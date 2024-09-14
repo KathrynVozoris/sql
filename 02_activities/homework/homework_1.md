@@ -1,3 +1,6 @@
+
+[Diagram.drawio.pdf](https://github.com/user-attachments/files/16983335/Diagram.drawio.pdf)
+
 # Homework 1: farmersmarket.db
 
 - Due on Thursday, September 12 at 11:59pm
