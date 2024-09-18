@@ -68,6 +68,6 @@ SELECT customer_id, (SUM([quantity]*[cost_to_customer_per_qty])) AS total_spent
 	,strftime('%Y', market_date) as purchase_year
 	
 FROM customer_purchases
-WHERE purchase_month = '07' AND purchase_year = '2022'
+WHERE purchase_month = '04' AND purchase_year = '2022'
 GROUP BY customer_id
 
