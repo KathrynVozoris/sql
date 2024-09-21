@@ -80,7 +80,8 @@ INSERT INTO product_units
 
 HINT: If you don't specify a WHERE clause, you are going to have a bad time.*/
 
-
+DELETE FROM product_units
+WHERE product_name like 'Cherry pie%' AND snapshot_timestamp = '2024-09-21 17:37:20';
 
 -- UPDATE
 /* 1.We want to add the current_quantity to the product_units table. 
