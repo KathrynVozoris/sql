@@ -23,7 +23,7 @@ FROM customer;
 DROP TABLE IF EXISTS cost_of_five;
 
 CREATE TEMP TABLE cost_of_five AS
---Calculate cost of (5 *original_price)*(number of customers) for each product
+
 SELECT vendor_id, product_id, (price_times_5*number_of_customers) AS [cost_5_per_customer]
 FROM
 (
