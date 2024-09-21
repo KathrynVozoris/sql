@@ -9,17 +9,17 @@ Think a bit about the row counts: how many distinct vendors, product names are t
 How many customers are there (y). 
 Before your final group by you should have the product of those two queries (x*y).  */
 
+--Create a temp table that shows the number of customers
 DROP TABLE IF EXISTS num_customers;
 
 CREATE TEMP TABLE num_customers AS
-
---Find the number of customers
 
 SELECT count(customer_id) AS number_of_customers
 FROM customer;
 
 --Create a table which includes vendor_id, product_id
 -- and calculates the cost of (5 *original_price)*(number of customers) for each product
+
 DROP TABLE IF EXISTS cost_of_five;
 
 CREATE TEMP TABLE cost_of_five AS
@@ -33,7 +33,7 @@ FROM
 	GROUP BY  product_id 
 );
 
---Add vendor names to the table
+--Create a temp table that add the vendor names to the previous temp table
 
 DROP TABLE IF EXISTS add_vendor_name;
 CREATE TEMP TABLE add_vendor_name AS
@@ -48,7 +48,7 @@ LEFT JOIN vendor
 ON cost_of_five.vendor_id = vendor.vendor_id
 ORDER BY cost_of_five.vendor_id;
 
---Add product names to the TABLE
+--Add product names to the previous temp table
 
 SELECT vendor_name, product_name, cost_5_per_customer
 FROM product
