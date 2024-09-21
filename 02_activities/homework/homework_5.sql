@@ -9,6 +9,52 @@ Think a bit about the row counts: how many distinct vendors, product names are t
 How many customers are there (y). 
 Before your final group by you should have the product of those two queries (x*y).  */
 
+DROP TABLE IF EXISTS num_customers;
+
+CREATE TEMP TABLE num_customers AS
+
+--Find the number of customers
+
+SELECT count(customer_id) AS number_of_customers
+FROM customer;
+
+--Create a table which includes vendor_id, product_id
+-- and calculates the cost of (5 *original_price)*(number of customers) for each product
+DROP TABLE IF EXISTS cost_of_five;
+
+CREATE TEMP TABLE cost_of_five AS
+--Calculate cost of (5 *original_price)*(number of customers) for each product
+SELECT vendor_id, product_id, (price_times_5*number_of_customers) AS [cost_5_per_customer]
+FROM
+(
+	SELECT vendor_id, product_id, (original_price*5) AS [price_times_5], [number_of_customers]
+	FROM vendor_inventory
+	JOIN num_customers
+	GROUP BY  product_id 
+);
+
+--Add vendor names to the table
+
+DROP TABLE IF EXISTS add_vendor_name;
+CREATE TEMP TABLE add_vendor_name AS
+
+SELECT vendor.vendor_name, 
+	cost_of_five.product_id, 
+	cost_of_five.cost_5_per_customer
+FROM cost_of_five
+
+LEFT JOIN vendor
+
+ON cost_of_five.vendor_id = vendor.vendor_id
+ORDER BY cost_of_five.vendor_id;
+
+--Add product names to the TABLE
+
+SELECT vendor_name, product_name, cost_5_per_customer
+FROM product
+INNER JOIN
+add_vendor_name
+ON product.product_id = add_vendor_name.product_id;
 
 
 -- INSERT
