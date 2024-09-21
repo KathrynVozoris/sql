@@ -72,7 +72,8 @@ WHERE product_qty_type = 'unit'
 /*2. Using `INSERT`, add a new row to the product_units table (with an updated timestamp). 
 This can be any product you desire (e.g. add another record for Apple Pie). */
 
-
+INSERT INTO product_units
+	VALUES(40, 'Peach pie', '12"', 2, 'unit', CURRENT_TIMESTAMP)
 
 -- DELETE
 /* 1. Delete the older record for the whatever product you added. 
