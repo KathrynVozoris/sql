@@ -100,8 +100,13 @@ Finally, make sure you have a WHERE statement to update the right row,
 	you'll need to use product_units.product_id to refer to the correct row within the product_units table. 
 When you have all of these components, you can run the update statement. */
 
----Note this code has some errors in running which I will fix
---Create TEMP table with only the most recent purchase of each product
+--Add the column current_quantity to the table product_units
+ALTER TABLE product_units
+ADD current_quantity INT;
+
+
+--Create a temp table called 'recent' with only the most recent purchase of each product
+--Include the columns [product_id], [quantity] and [market date]
 DROP TABLE IF EXISTS recent;
 
 CREATE TEMP TABLE recent AS
@@ -115,23 +120,32 @@ FROM
 )x
 WHERE x.[ranking]= 1;
 
-SELECT product_units.product_id, product_name, product_size, product_qty_type, snapshot_timestamp, current_quantity, recent.quantity,
-CASE WHEN product_units.quntity = NULL
-	THEN  0
-END;
+
+--Using LEFT JOIN add the [quantity] column from the 'recent' table to the 'product_units' table
+-- Update [current_quantity] to be the same value as [quantity] in the 'products_units' table
+UPDATE product_units
+SET current_quantity = x.quantity
+FROM
+(
+SELECT 	product_units.product_id
+		,product_name
+		,product_size
+		,product_category_id 
+		,product_qty_type
+		,snapshot_timestamp
+		,CASE 
+			WHEN recent.quantity IS NULL
+			THEN 0
+			ELSE recent.quantity
+		END AS quantity
 FROM
 product_units
-
 LEFT JOIN recent
 ON product_units.product_id = recent.product_id
+) x
+WHERE current_quantity is NULL AND product_units.product_id = x.product_id
 
 
 
-UPDATE product_units
-SET
-  product_units.current_quantity = recent.quantity
-FROM
-  recent
-WHERE recent.quantity != 0;
 
 
