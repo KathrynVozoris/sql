@@ -100,4 +100,38 @@ Finally, make sure you have a WHERE statement to update the right row,
 	you'll need to use product_units.product_id to refer to the correct row within the product_units table. 
 When you have all of these components, you can run the update statement. */
 
+---Note this code has some errors in running which I will fix
+--Create TEMP table with only the most recent purchase of each product
+DROP TABLE IF EXISTS recent;
+
+CREATE TEMP TABLE recent AS
+
+SELECT *
+FROM
+(
+	SELECT product_id, quantity, market_date
+			,dense_rank() OVER(PARTITION BY product_id ORDER BY market_date DESC) as [ranking]
+	FROM vendor_inventory
+)x
+WHERE x.[ranking]= 1;
+
+SELECT product_units.product_id, product_name, product_size, product_qty_type, snapshot_timestamp, current_quantity, recent.quantity,
+CASE WHEN product_units.quntity = NULL
+	THEN  0
+END;
+FROM
+product_units
+
+LEFT JOIN recent
+ON product_units.product_id = recent.product_id
+
+
+
+UPDATE product_units
+SET
+  product_units.current_quantity = recent.quantity
+FROM
+  recent
+WHERE recent.quantity != 0;
+
 
