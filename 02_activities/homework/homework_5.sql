@@ -9,53 +9,49 @@ Think a bit about the row counts: how many distinct vendors, product names are t
 How many customers are there (y). 
 Before your final group by you should have the product of those two queries (x*y).  */
 
---Create a temp table that shows the number of customers
-DROP TABLE IF EXISTS num_customers;
-
-CREATE TEMP TABLE num_customers AS
-
-SELECT count(customer_id) AS number_of_customers
-FROM customer;
-
---Create a table which includes vendor_id, product_id
--- and calculates the cost of (5 *original_price)*(number of customers) for each product
-
-DROP TABLE IF EXISTS cost_of_five;
-
-CREATE TEMP TABLE cost_of_five AS
-
-SELECT vendor_id, product_id, (price_times_5*number_of_customers) AS [cost_5_per_customer]
+--Add the [product_name] from the 'product' table 
+SELECT 	z.vendor_name
+		,product.product_name
+		,z.cost_5_per_customer
 FROM
 (
-	SELECT vendor_id, product_id, (original_price*5) AS [price_times_5], [number_of_customers]
-	FROM vendor_inventory
-	JOIN num_customers
-	GROUP BY  product_id 
-);
-
---Create a temp table that add the vendor names to the previous temp table
-
-DROP TABLE IF EXISTS add_vendor_name;
-CREATE TEMP TABLE add_vendor_name AS
-
-SELECT vendor.vendor_name, 
-	cost_of_five.product_id, 
-	cost_of_five.cost_5_per_customer
-FROM cost_of_five
-
-LEFT JOIN vendor
-
-ON cost_of_five.vendor_id = vendor.vendor_id
-ORDER BY cost_of_five.vendor_id;
-
---Add product names to the previous temp table
-
-SELECT vendor_name, product_name, cost_5_per_customer
-FROM product
-INNER JOIN
-add_vendor_name
-ON product.product_id = add_vendor_name.product_id;
-
+  --Add the [vendor_name] column from the 'vendor' table 
+  --Calculate cost of 5x each product for all customers
+  SELECT 	y.vendor_id
+			,vendor.vendor_name
+			,y.product_id
+			,SUM(y.original_price*5) AS cost_5_per_customer
+  FROM
+  
+  (	--Add the columns [vendor_id] and [orginal_price] from 'vendor_inventory' table
+	 SELECT vi.vendor_id, x.product_id, vi.original_price, x.customer_id
+	 FROM
+	(
+		---Add list of customer_id's to the list of products in 'vendor_inventory' table
+		
+		SELECT product_id, customer.customer_id
+		FROM 
+		(SELECT DISTINCT product_id
+			FROM vendor_inventory) AS w
+		CROSS JOIN
+		customer
+	) AS x
+	LEFT JOIN vendor_inventory as vi
+	ON x.product_id = vi.product_id
+	GROUP BY x.product_id, customer_id
+		
+  ) AS y
+  
+  INNER JOIN vendor
+  ON y.vendor_id = vendor.vendor_id
+  GROUP BY product_id
+  
+  ) AS Z
+ 
+INNER JOIN product
+ON z.product_id = product.product_id
+GROUP BY z.product_id
+ 
 
 -- INSERT
 /*1.  Create a new table "product_units". 
